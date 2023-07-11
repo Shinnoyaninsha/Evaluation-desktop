@@ -7,6 +7,8 @@ import pandas as pd
 import numpy as np
 from PyQt5 import QtCore
 import seaborn as sns
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 
 class MainWindow(QMainWindow):
@@ -18,6 +20,7 @@ class MainWindow(QMainWindow):
         
         self.dataviz= None
         self.table=None
+        self.canvas=None
         self.vBox=QVBoxLayout()
         self.file_selector=QPushButton('Pick a csv file')
         self.file_selector.clicked.connect(self.fileSelection)
@@ -68,6 +71,16 @@ class MainWindow(QMainWindow):
         self.pivot_table=self.pivot_table.reset_index()
         self.dataviz=DataWindow(self.pivot_table)
         self.tab5.layout.addWidget(self.dataviz)
+    def displayCharts(self):
+        self.chart=sns.barplot(data=self.data,x=self.chart_column_list_row.currentText(),y=self.chart_column_list_val.currentText(),estimator="sum", ci=None)
+        plt.show()
+        self.figure=plt.figure()
+        self.canvas=FigureCanvas(self.figure)
+        
+        self.canvas.draw()
+        self.tab6.layout.addWidget(self.canvas)
+        
+
         
 
 
@@ -137,7 +150,27 @@ class MainWindow(QMainWindow):
             self.tabs.addTab(self.tab5,"Pivot Table")
 
 
-            
+            self.tab6=QWidget()
+            self.tab6.layout=QVBoxLayout(self)
+            self.tab6.layout.addWidget(QLabel("Display some charts here"))
+            self.tab6.layout.addWidget(QLabel("Choose a field for the first spread"))
+            self.chart_column_list_row=QComboBox()
+            self.chart_column_list_row.addItems(self.data.columns)
+            self.tab6.layout.addWidget(self.chart_column_list_row)
+            self.tab6.layout.addWidget(QLabel("Choose a field for the values"))
+            self.chart_column_list_val=QComboBox()
+            self.chart_column_list_val.addItems(self.values)
+            self.tab6.layout.addWidget(self.chart_column_list_val)
+            self.tab6.layout.addWidget(QLabel("Choose an aggregation method"))
+            self.aggregate_selection=QComboBox()
+            self.aggregate_selection.addItems(["Sum","Mean average","Count"])
+            self.charts_display=QPushButton()
+            self.charts_display.setText("Click to display charts")
+            self.charts_display.clicked.connect(self.displayCharts)
+            self.tab6.layout.addWidget(self.charts_display)
+            self.tab6.setLayout(self.tab6.layout)
+            self.tabs.addTab(self.tab6,"Charts")
+
 
 
 
